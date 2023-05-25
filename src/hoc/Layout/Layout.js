@@ -1,12 +1,12 @@
 import React, {Fragment, useState} from "react";
-import Toolbar from "../Navigation/Toolbar/Toolbar/Toolbar";
+import Toolbar from "../../components/Navigation/Toolbar/Toolbar/Toolbar";
 import  './Layout.css'
-import SideDrawer from "../Navigation/SideDrawer/SideDrawer";
+import SideDrawer from "../../components/Navigation/SideDrawer/SideDrawer";
 
 const Layout = (props) => {
 
     const [showSideDrawer,updateSideDrawer] = useState({
-        showSideDr: true
+        showSideDr: false
     })
     const sideDrawerCloseHandler = () => {
         updateSideDrawer({showSideDr: false})
