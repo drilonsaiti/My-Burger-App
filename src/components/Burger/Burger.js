@@ -1,21 +1,26 @@
 import React from "react";
 import BurgerIngredient from "./BurgerIngredient/BurgerIngredient";
 import './Burger.css'
-const Burger = (props) => {
-    let transformedIngredients = Object.keys(props.ingredients)
-        .map(igKey => {
-            return [...Array(props.ingredients[igKey])].map((_,i) => {
-                console.log(`Array  key ${igKey + 1} ${igKey}`)
-               return <BurgerIngredient key={igKey + i} type={igKey}/>
-            })
-        }).reduce((arr,el) => {
-            return arr.concat(el);
-        },[]);
+import {useNavigate} from "react-router-dom";
 
-    if (transformedIngredients.length === 0){
-        transformedIngredients = <p>Please start adding ingredients!</p>
+const Burger = (props) => {
+    let transformedIngredients = [];
+
+    if (props.ingredients && Object.keys(props.ingredients).length > 0) {
+
+        transformedIngredients = Object.keys(props.ingredients)
+            .map((igKey) => {
+
+                return [...Array(props.ingredients[igKey])].map((_, i) => (
+                    <BurgerIngredient key={igKey + i} type={igKey} />
+                ));
+            })
+            .reduce((arr, el) => arr.concat(el), []);
+    } else {
+        transformedIngredients = <p>Please start adding ingredients!</p>;
     }
-    console.log(transformedIngredients);
+
+
     return (
         <div className="Burger">
         <BurgerIngredient type="bread-top"/>
