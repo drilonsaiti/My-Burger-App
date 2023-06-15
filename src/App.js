@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ContactData from "./containers/Checkout/ConctactData/ContactData";
 import Orders from "./containers/Orders/Orders";
 
+
 function App() {
     return (
         <BrowserRouter>

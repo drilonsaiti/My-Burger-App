@@ -2,48 +2,53 @@ import React, {useEffect, useState} from "react";
 import CheckoutSummary from "../../components/Order/CheckoutSummary/CheckoutSummary";
 import {Routes, Route, useLocation, useNavigate, useMatch, Outlet} from "react-router-dom";
 import ContactData from "./ConctactData/ContactData";
+import {connect} from "react-redux";
+import * as actions from '../../store/actions/index'
 const Checkout = (props) => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [state,setState] = useState({
-        ingredients: null,
-        price: 0
-    });
 
     useEffect(() => {
-        const query = new URLSearchParams(location.search);
-        let ingredients = {};
-        let price = 0;
-        for (const [key, value] of query.entries()) {
-            if(key === 'price'){
-                price = value;
-            }else {
-                ingredients[key] = value;
-            }
+        props.onInitPurchase();
+        if(props.purchased) {
+            navigate('/orders')
         }
-        setState({
-            price: price,
-            ingredients: ingredients
-        });
-    }, []);
+    },[props.purchased])
+
+
 
     const checkoutCancelledHandler = () => {
-        navigate(-1);
+        navigate(-1, { replace: true });
     }
     const checkoutContinueHandler = () => {
-        navigate('/checkout/contact-data', { state: { ingredients: state.ingredients,price: state.price }, replace: true });
+        navigate('/checkout/contact-data',{replace:true});
     }
+
 
 
     return(
         <div>
+
             <CheckoutSummary checkoutCancelled={checkoutCancelledHandler}
                              checkoutContinued={checkoutContinueHandler}
-                             ingredients={state.ingredients} />
+                             ingredients={props.ings} />
             <Outlet/>
         </div>
     );
 }
 
-export default React.memo(Checkout);
+const mapStateToProps = (state) => {
+    return {
+        ings: state.burgerBuilder.ingredients,
+        purchased: state.order.purchased
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onInitPurchase: () => dispatch(actions.purchaseInit())
+    }
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(React.memo(Checkout));

@@ -5,7 +5,7 @@ const Input = (props) => {
     const [isTouched, setIsTouched] = useState(false);
     let inputClasses = ["InputElement"];
 
-    if (isTouched && props.value.trim() === "" && props.shouldValidate) {
+    if (isTouched && props.invalid && props.shouldValidate ) {
         inputClasses.push("Invalid");
     }
 

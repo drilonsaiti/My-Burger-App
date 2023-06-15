@@ -5,8 +5,10 @@ import {useLocation, useNavigate} from "react-router-dom";
 import axios from "../../../axios-order";
 import Spinner from "../../../components/UI/Spinner/Spinner";
 import Input from "../../../components/UI/Input/Input";
-
-const ContactData = () => {
+import WithErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import {connect} from "react-redux";
+import * as actionTypes from '../../../store/actions/index'
+const ContactData = (props) => {
     const [state, setState] = useState(({
         orderForm: {
 
@@ -47,6 +49,7 @@ const ContactData = () => {
                     required: true,
                     minLength: 5,
                     maxLength: 5,
+                    isNumeric: true
                 },
                 valid: false,
                 touched: false
@@ -72,7 +75,8 @@ const ContactData = () => {
                 },
                 value: '',
                 validation: {
-                    required: true
+                    required: true,
+                    isEmail: true
                 },
                 valid: false,
                 touched: false
@@ -90,36 +94,25 @@ const ContactData = () => {
             }
         },
         formIsValid: false,
-        loading: false
+        
     }));
-    const location = useLocation();
-    const {ingredients, price} = location.state || {};
+
     const navigate = useNavigate();
 
     const orderHandler = (e) => {
         e.preventDefault();
-        setState(prevState => {
-            prevState.loading = true;
-            return {...prevState};
-        });
+
         const formData = {};
         for (let formElementId in state.orderForm) {
             formData[formElementId] = state.orderForm[formElementId].value;
         }
         const order = {
-            ingredients: ingredients,
-            price: price,
+            ingredients: props.ings,
+            price: props.price,
             orderData: formData
 
         }
-        axios.post('/orders.json', order)
-            .then(response => {
-                setState({...state, loading: false});
-                navigate('/')
-            })
-            .catch(error => {
-                setState({...state, loading: false});
-            });
+        props.onOrderBurger(order);
     }
 
     const checkValidity = (value, rules) => {
@@ -138,13 +131,22 @@ const ContactData = () => {
         if (rules.maxLength) {
             isValid = value.length <= rules.maxLength && isValid
         }
+        if (rules.isEmail) {
+            const pattern = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+            isValid = pattern.test(value) && isValid
+        }
+
+        if (rules.isNumeric) {
+            const pattern = /^\d+$/;
+            isValid = pattern.test(value) && isValid
+        }
         return isValid;
     }
 
     const inputChangedHandler = (event, inputId) => {
         const newValue = event.target.value;
         const newValid = checkValidity(newValue, state.orderForm[inputId].validation);
-
+        console.log(newValid,inputId);
         setState(prevState => {
             const updatedOrderForm = {
                 ...prevState.orderForm,
@@ -187,7 +189,7 @@ const ContactData = () => {
         <Button btnType="Success" disabled={!state.formIsValid} clicked={orderHandler}>ORDER</Button>
     </form>);
 
-    if (state.loading) {
+    if (props.loading) {
         forms = <Spinner/>
     }
     return (
@@ -199,4 +201,18 @@ const ContactData = () => {
     );
 }
 
-export default ContactData
+const mapStateToProps = state => {
+    return {
+        ings: state.burgerBuilder.ingredients,
+        price: state.burgerBuilder.totalPrice,
+        loading: state.order.loading
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onOrderBurger: (orderData) => dispatch(actionTypes.purchaseBurger(orderData))
+    }
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(WithErrorHandler(ContactData,axios))
